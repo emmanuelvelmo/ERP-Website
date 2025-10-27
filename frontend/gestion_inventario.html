@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Gestión de Inventario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn, .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .form-section, .list-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .low-stock {
+            background: #fff3cd;
+            color: #856404;
+            padding: 0.3rem 0.6rem;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Gestión de Inventario</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <a href="index.html" class="back-btn">Volver al Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">Gestión de Productos e Inventario</h1>
+
+        <div class="form-section">
+            <h2>Agregar Nuevo Producto</h2>
+            <form id="productForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nombre">Nombre del Producto:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria">Categoría:</label>
+                        <select id="categoria" name="categoria" required>
+                            <option value="">Seleccionar categoría</option>
+                            <option value="Computadoras">Computadoras</option>
+                            <option value="Periféricos">Periféricos</option>
+                            <option value="Componentes">Componentes</option>
+                            <option value="Redes">Redes</option>
+                            <option value="Software">Software</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="precio_compra">Precio de Compra:</label>
+                        <input type="number" id="precio_compra" name="precio_compra" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="precio_venta">Precio de Venta:</label>
+                        <input type="number" id="precio_venta" name="precio_venta" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cantidad_inicial">Cantidad Inicial:</label>
+                        <input type="number" id="cantidad_inicial" name="cantidad_inicial" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock_minimo">Stock Mínimo:</label>
+                        <input type="number" id="stock_minimo" name="stock_minimo" value="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion">Ubicación en Almacén:</label>
+                        <input type="text" id="ubicacion" name="ubicacion" value="Almacén A">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <input type="text" id="descripcion" name="descripcion" required>
+                </div>
+                <button type="submit" class="btn">Agregar Producto</button>
+            </form>
+        </div>
+
+        <div class="list-section">
+            <h2>Productos en Inventario</h2>
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio Compra</th>
+                        <th>Precio Venta</th>
+                        <th>Stock</th>
+                        <th>Stock Mínimo</th>
+                        <th>Ubicación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <!-- Los productos se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+        }
+
+        // Cargar inventario
+        async function loadInventory() {
+            try {
+                const response = await fetch('http://localhost:3000/api/inventario');
+                const inventario = await response.json();
+                
+                const tbody = document.getElementById('inventoryBody');
+                tbody.innerHTML = inventario.map(item => `
+                    <tr>
+                        <td>${item.producto_id}</td>
+                        <td>${item.nombre}</td>
+                        <td>${item.categoria}</td>
+                        <td>$${item.precio_compra?.toLocaleString() || 'N/A'}</td>
+                        <td>$${item.precio_venta?.toLocaleString() || 'N/A'}</td>
+                        <td>
+                            ${item.cantidad}
+                            ${item.cantidad <= item.stock_minimo ? '<span class="low-stock">Stock Bajo</span>' : ''}
+                        </td>
+                        <td>${item.stock_minimo}</td>
+                        <td>${item.ubicacion}</td>
+                        <td class="actions">
+                            <button class="btn-edit" onclick="editProduct(${item.producto_id})">Editar</button>
+                            <button class="btn-delete" onclick="deleteProduct(${item.producto_id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error cargando inventario:', error);
+            }
+        }
+
+        // Agregar nuevo producto
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const productData = {
+                nombre: formData.get('nombre'),
+                descripcion: formData.get('descripcion'),
+                categoria: formData.get('categoria'),
+                precio_compra: parseFloat(formData.get('precio_compra')),
+                precio_venta: parseFloat(formData.get('precio_venta')),
+                cantidad_inicial: parseInt(formData.get('cantidad_inicial')),
+                stock_minimo: parseInt(formData.get('stock_minimo')),
+                ubicacion: formData.get('ubicacion')
+            };
+
+            try {
+                const response = await fetch('http://localhost:3000/api/inventario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Producto agregado exitosamente');
+                    this.reset();
+                    loadInventory();
+                } else {
+                    alert('Error al agregar producto: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+
+        function editProduct(id) {
+            alert('Editar producto ' + id + ' - Funcionalidad en desarrollo');
+        }
+
+        function deleteProduct(id) {
+            if (confirm('¿Estás seguro de eliminar este producto?')) {
+                alert('Eliminar producto ' + id + ' - Funcionalidad en desarrollo');
+            }
+        }
+
+        // Cargar inventario al iniciar
+        document.addEventListener('DOMContentLoaded', loadInventory);
+    </script>
+</body>
+</html>

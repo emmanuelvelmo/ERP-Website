@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Historial de Ventas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn, .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .sales-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .sale-details {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 0.5rem;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Historial de Ventas</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <a href="index.html" class="back-btn">Volver al Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">Historial y Análisis de Ventas</h1>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalVentas">0</div>
+                <div class="stat-label">Total Ventas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="ingresosTotales">$0</div>
+                <div class="stat-label">Ingresos Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="ventasMes">0</div>
+                <div class="stat-label">Ventas Este Mes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="promedioVenta">$0</div>
+                <div class="stat-label">Ticket Promedio</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="fechaInicio">Fecha Inicio:</label>
+                    <input type="date" id="fechaInicio">
+                </div>
+                <div class="form-group">
+                    <label for="fechaFin">Fecha Fin:</label>
+                    <input type="date" id="fechaFin">
+                </div>
+                <div class="form-group">
+                    <label for="clienteFilter">Filtrar por Cliente:</label>
+                    <select id="clienteFilter">
+                        <option value="">Todos los clientes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button class="btn" onclick="applyFilters()">Aplicar Filtros</button>
+                    <button class="btn btn-secondary" onclick="clearFilters()" style="margin-top: 0.5rem;">Limpiar Filtros</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sales-section">
+            <h2>Historial de Ventas</h2>
+            <table id="salesTable">
+                <thead>
+                    <tr>
+                        <th>ID Venta</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Productos</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="salesBody">
+                    <!-- Las ventas se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+        }
+
+        let salesData = [];
+        let clients = [];
+
+        // Cargar datos iniciales
+        async function loadInitialData() {
+            await loadSales();
+            await loadClients();
+        }
+
+        // Cargar ventas
+        async function loadSales() {
+            try {
+                const response = await fetch('http://localhost:3000/api/ventas');
+                salesData = await response.json();
+                applyFilters();
+                updateStats();
+            } catch (error) {
+                console.error('Error cargando ventas:', error);
+            }
+        }
+
+        // Cargar clientes
+        async function loadClients() {
+            try {
+                const response = await fetch('http://localhost:3000/api/clientes');
+                clients = await response.json();
+                const clienteFilter = document.getElementById('clienteFilter');
+                clienteFilter.innerHTML = '<option value="">Todos los clientes</option>' +
+                    clients.map(client => 
+                        `<option value="${client.id}">${client.nombre}</option>`
+                    ).join('');
+            } catch (error) {
+                console.error('Error cargando clientes:', error);
+            }
+        }
+
+        function applyFilters() {
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            const clienteId = document.getElementById('clienteFilter').value;
+
+            let filteredData = salesData.filter(sale => {
+                const saleDate = new Date(sale.fecha);
+                const matchesFecha = 
+                    (!fechaInicio || saleDate >= new Date(fechaInicio)) &&
+                    (!fechaFin || saleDate <= new Date(fechaFin + 'T23:59:59'));
+                const matchesCliente = !clienteId || sale.cliente_id == clienteId;
+
+                return matchesFecha && matchesCliente;
+            });
+
+            displaySales(filteredData);
+        }
+
+        function clearFilters() {
+            document.getElementById('fechaInicio').value = '';
+            document.getElementById('fechaFin').value = '';
+            document.getElementById('clienteFilter').value = '';
+            applyFilters();
+        }
+
+        function displaySales(data) {
+            const salesBody = document.getElementById('salesBody');
+            salesBody.innerHTML = data.map(sale => `
+                <tr>
+                    <td>${sale.id}</td>
+                    <td>${new Date(sale.fecha).toLocaleDateString()}</td>
+                    <td>${sale.cliente_nombre}</td>
+                    <td>
+                        <button onclick="toggleDetails(${sale.id})">Ver Productos</button>
+                        <div id="details-${sale.id}" class="sale-details" style="display: none;">
+                            ${sale.productos.map(product => `
+                                <div class="product-item">
+                                    <span>${product.nombre}</span>
+                                    <span>${product.cantidad} x $${product.precio_unitario?.toLocaleString() || product.precio?.toLocaleString() || '0'}</span>
+                                    <span>$${(product.cantidad * (product.precio_unitario || product.precio || 0)).toLocaleString()}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </td>
+                    <td>$${sale.total.toLocaleString()}</td>
+                    <td><span style="color: green;">${sale.estado}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleDetails(saleId) {
+            const details = document.getElementById(`details-${saleId}`);
+            details.style.display = details.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function updateStats() {
+            const totalVentas = salesData.length;
+            const ingresosTotales = salesData.reduce((sum, sale) => sum + sale.total, 0);
+            const mesActual = new Date().getMonth();
+            const ventasMes = salesData.filter(sale => 
+                new Date(sale.fecha).getMonth() === mesActual).length;
+            const promedioVenta = totalVentas > 0 ? ingresosTotales / totalVentas : 0;
+
+            document.getElementById('totalVentas').textContent = totalVentas;
+            document.getElementById('ingresosTotales').textContent = `$${ingresosTotales.toLocaleString()}`;
+            document.getElementById('ventasMes').textContent = ventasMes;
+            document.getElementById('promedioVenta').textContent = `$${promedioVenta.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', loadInitialData);
+    </script>
+</body>
+</html>

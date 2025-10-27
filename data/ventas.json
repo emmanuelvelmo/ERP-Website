@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "cliente_id": 1,
+    "productos": [
+      {
+        "producto_id": 2,
+        "cantidad": 2,
+        "precio": 300
+      }
+    ],
+    "total": 600,
+    "fecha": "2025-01-20T14:30:00.000Z",
+    "estado": "completada"
+  },
+  {
+    "id": 2,
+    "cliente_id": 2,
+    "productos": [
+      {
+        "producto_id": 1,
+        "cantidad": 1,
+        "precio": 12000
+      },
+      {
+        "producto_id": 3,
+        "cantidad": 1,
+        "precio": 800
+      }
+    ],
+    "total": 12800,
+    "fecha": "2025-01-21T16:45:00.000Z",
+    "estado": "completada"
+  }
+]

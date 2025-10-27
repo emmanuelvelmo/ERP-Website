@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Reportes Detallados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn, .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .reports-tabs {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            padding: 2rem;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .chart-container {
+            height: 400px;
+            margin-bottom: 2rem;
+        }
+
+        .report-actions {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th, .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .kpi-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Reportes Detallados</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <a href="index.html" class="back-btn">Volver al Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">Reportes Analíticos y Gráficos</h1>
+
+        <div class="reports-tabs">
+            <div class="tabs-header">
+                <div class="tab active" onclick="switchTab('sales')">Ventas</div>
+                <div class="tab" onclick="switchTab('inventory')">Inventario</div>
+                <div class="tab" onclick="switchTab('clients')">Clientes</div>
+                <div class="tab" onclick="switchTab('financial')">Financiero</div>
+            </div>
+
+            <!-- Pestaña de Ventas -->
+            <div id="sales-tab" class="tab-content active">
+                <div class="report-actions">
+                    <button class="btn" onclick="exportSalesReport()">Exportar Reporte</button>
+                    <button class="btn btn-secondary" onclick="printSalesReport()">Imprimir</button>
+                </div>
+
+                <div class="kpi-cards">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="totalSales">0</div>
+                        <div class="kpi-label">Ventas Totales</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="monthlyRevenue">$0</div>
+                        <div class="kpi-label">Ingresos Mensuales</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="avgTicket">$0</div>
+                        <div class="kpi-label">Ticket Promedio</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="growthRate">0%</div>
+                        <div class="kpi-label">Crecimiento</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="salesTrendChart"></canvas>
+                </div>
+
+                <h3>Productos Más Vendidos</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Unidades Vendidas</th>
+                            <th>Ingresos</th>
+                            <th>% del Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topProductsBody">
+                        <!-- Los productos se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pestaña de Inventario -->
+            <div id="inventory-tab" class="tab-content">
+                <div class="kpi-cards">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="totalProducts">0</div>
+                        <div class="kpi-label">Total Productos</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="inventoryValue">$0</div>
+                        <div class="kpi-label">Valor Inventario</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="lowStockItems">0</div>
+                        <div class="kpi-label">Stock Bajo</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="outOfStock">0</div>
+                        <div class="kpi-label">Sin Stock</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="inventoryStatusChart"></canvas>
+                </div>
+
+                <h3>Productos con Stock Bajo</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Stock Actual</th>
+                            <th>Stock Mínimo</th>
+                            <th>Diferencia</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lowStockBody">
+                        <!-- Los productos con stock bajo se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pestaña de Clientes -->
+            <div id="clients-tab" class="tab-content">
+                <div class="kpi-cards">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="totalClients">0</div>
+                        <div class="kpi-label">Total Clientes</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="activeClients">0</div>
+                        <div class="kpi-label">Clientes Activos</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="newClients">0</div>
+                        <div class="kpi-label">Nuevos este Mes</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="retentionRate">0%</div>
+                        <div class="kpi-label">Tasa Retención</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="clientsChart"></canvas>
+                </div>
+
+                <h3>Mejores Clientes</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Total Compras</th>
+                            <th>Valor Total</th>
+                            <th>Última Compra</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topClientsBody">
+                        <!-- Los mejores clientes se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pestaña Financiera -->
+            <div id="financial-tab" class="tab-content">
+                <div class="kpi-cards">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="grossRevenue">$0</div>
+                        <div class="kpi-label">Ingresos Brutos</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="netProfit">$0</div>
+                        <div class="kpi-label">Utilidad Neta</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="profitMargin">0%</div>
+                        <div class="kpi-label">Margen Utilidad</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="roi">0%</div>
+                        <div class="kpi-label">ROI</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="financialChart"></canvas>
+                </div>
+
+                <h3>Análisis de Rentabilidad por Producto</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Ingresos</th>
+                            <th>Costo</th>
+                            <th>Utilidad</th>
+                            <th>Margen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="profitabilityBody">
+                        <!-- Los datos de rentabilidad se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+        }
+
+        // Cambiar pestañas
+        function switchTab(tabName) {
+            // Ocultar todas las pestañas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Mostrar pestaña seleccionada
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            // Cargar datos específicos de la pestaña
+            loadTabData(tabName);
+        }
+
+        // Cargar datos de la pestaña
+        function loadTabData(tabName) {
+            switch(tabName) {
+                case 'sales':
+                    loadSalesData();
+                    break;
+                case 'inventory':
+                    loadInventoryData();
+                    break;
+                case 'clients':
+                    loadClientsData();
+                    break;
+                case 'financial':
+                    loadFinancialData();
+                    break;
+            }
+        }
+
+        // Cargar datos de ventas
+        async function loadSalesData() {
+            try {
+                const response = await fetch('http://localhost:3000/api/reportes/ventas');
+                const data = await response.json();
+                
+                // Actualizar KPIs
+                document.getElementById('totalSales').textContent = data.cantidadVentas || 0;
+                document.getElementById('monthlyRevenue').textContent = `$${(data.totalVentas || 0).toLocaleString()}`;
+                document.getElementById('avgTicket').textContent = `$${((data.totalVentas || 0) / (data.cantidadVentas || 1)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+                
+                // Gráfico de tendencia de ventas
+                updateSalesTrendChart(data.ventasPorMes || {});
+                
+            } catch (error) {
+                console.error('Error cargando datos de ventas:', error);
+            }
+        }
+
+        // Actualizar gráfico de tendencia de ventas
+        function updateSalesTrendChart(salesByMonth) {
+            const ctx = document.getElementById('salesTrendChart').getContext('2d');
+            const months = Object.keys(salesByMonth);
+            const amounts = Object.values(salesByMonth);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Ventas Mensuales',
+                        data: amounts,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Cargar datos de inventario
+        async function loadInventoryData() {
+            try {
+                const response = await fetch('http://localhost:3000/api/reportes/inventario');
+                const data = await response.json();
+                
+                // Actualizar KPIs
+                document.getElementById('totalProducts').textContent = data.totalProductos || 0;
+                document.getElementById('inventoryValue').textContent = `$${(data.valorTotalInventario || 0).toLocaleString()}`;
+                document.getElementById('lowStockItems').textContent = data.productosBajoStock?.length || 0;
+                
+                // Gráfico de estado de inventario
+                updateInventoryStatusChart(data);
+                
+            } catch (error) {
+                console.error('Error cargando datos de inventario:', error);
+            }
+        }
+
+        // Actualizar gráfico de estado de inventario
+        function updateInventoryStatusChart(data) {
+            const ctx = document.getElementById('inventoryStatusChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Stock Normal', 'Stock Bajo', 'Sin Stock'],
+                    datasets: [{
+                        label: 'Cantidad de Productos',
+                        data: [
+                            (data.totalProductos || 0) - (data.productosBajoStock?.length || 0),
+                            data.productosBajoStock?.length || 0,
+                            0 // Sin stock
+                        ],
+                        backgroundColor: [
+                            '#2ecc71',
+                            '#f39c12',
+                            '#e74c3c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Funciones de exportación e impresión (placeholders)
+        function exportSalesReport() {
+            alert('Funcionalidad de exportación en desarrollo');
+        }
+
+        function printSalesReport() {
+            window.print();
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+
+        // Cargar datos iniciales de la pestaña activa
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTabData('sales');
+        });
+    </script>
+</body>
+</html>

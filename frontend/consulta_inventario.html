@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Consulta de Inventario</title>
+    <style>
+        /* Estilos similares a gestion_inventario.html por consistencia */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn, .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .inventory-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .low-stock {
+            background: #fff3cd;
+            color: #856404;
+            padding: 0.3rem 0.6rem;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .out-of-stock {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 0.3rem 0.6rem;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Consulta de Inventario</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <a href="index.html" class="back-btn">Volver al Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">Consulta y Análisis de Inventario</h1>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalProductos">0</div>
+                <div class="stat-label">Total Productos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="valorInventario">$0</div>
+                <div class="stat-label">Valor Total Inventario</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="alertasStock">0</div>
+                <div class="stat-label">Alertas de Stock</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="productosActivos">0</div>
+                <div class="stat-label">Productos Activos</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="search">Buscar Producto:</label>
+                    <input type="text" id="search" placeholder="Nombre o categoría...">
+                </div>
+                <div class="form-group">
+                    <label for="categoriaFilter">Filtrar por Categoría:</label>
+                    <select id="categoriaFilter">
+                        <option value="">Todas las categorías</option>
+                        <option value="Computadoras">Computadoras</option>
+                        <option value="Periféricos">Periféricos</option>
+                        <option value="Componentes">Componentes</option>
+                        <option value="Redes">Redes</option>
+                        <option value="Software">Software</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="stockFilter">Filtrar por Stock:</label>
+                    <select id="stockFilter">
+                        <option value="">Todo el stock</option>
+                        <option value="low">Stock Bajo</option>
+                        <option value="out">Sin Stock</option>
+                        <option value="normal">Stock Normal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button class="btn" onclick="applyFilters()">Aplicar Filtros</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="inventory-section">
+            <h2>Inventario Actual</h2>
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio Compra</th>
+                        <th>Precio Venta</th>
+                        <th>Stock Actual</th>
+                        <th>Stock Mínimo</th>
+                        <th>Valor en Inventario</th>
+                        <th>Estado</th>
+                        <th>Ubicación</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <!-- Los productos se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+        }
+
+        let inventoryData = [];
+
+        // Cargar inventario
+        async function loadInventory() {
+            try {
+                const response = await fetch('http://localhost:3000/api/inventario');
+                inventoryData = await response.json();
+                applyFilters();
+                updateStats();
+            } catch (error) {
+                console.error('Error cargando inventario:', error);
+            }
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const categoria = document.getElementById('categoriaFilter').value;
+            const stockFilter = document.getElementById('stockFilter').value;
+
+            let filteredData = inventoryData.filter(item => {
+                const matchesSearch = item.nombre.toLowerCase().includes(searchTerm) || 
+                                    item.categoria.toLowerCase().includes(searchTerm);
+                const matchesCategoria = !categoria || item.categoria === categoria;
+                const matchesStock = 
+                    !stockFilter ||
+                    (stockFilter === 'low' && item.cantidad <= item.stock_minimo && item.cantidad > 0) ||
+                    (stockFilter === 'out' && item.cantidad === 0) ||
+                    (stockFilter === 'normal' && item.cantidad > item.stock_minimo);
+
+                return matchesSearch && matchesCategoria && matchesStock;
+            });
+
+            displayInventory(filteredData);
+        }
+
+        function displayInventory(data) {
+            const tbody = document.getElementById('inventoryBody');
+            tbody.innerHTML = data.map(item => {
+                const valorInventario = (item.cantidad * (item.precio_compra || 0));
+                let estado = '';
+                
+                if (item.cantidad === 0) {
+                    estado = '<span class="out-of-stock">Sin Stock</span>';
+                } else if (item.cantidad <= item.stock_minimo) {
+                    estado = '<span class="low-stock">Stock Bajo</span>';
+                } else {
+                    estado = '<span style="color: green;">✓ Normal</span>';
+                }
+
+                return `
+                    <tr>
+                        <td>${item.producto_id}</td>
+                        <td>${item.nombre}</td>
+                        <td>${item.categoria}</td>
+                        <td>$${item.precio_compra?.toLocaleString() || 'N/A'}</td>
+                        <td>$${item.precio_venta?.toLocaleString() || 'N/A'}</td>
+                        <td>${item.cantidad}</td>
+                        <td>${item.stock_minimo}</td>
+                        <td>$${valorInventario.toLocaleString()}</td>
+                        <td>${estado}</td>
+                        <td>${item.ubicacion}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const totalProductos = inventoryData.length;
+            const valorInventario = inventoryData.reduce((sum, item) => 
+                sum + (item.cantidad * (item.precio_compra || 0)), 0);
+            const alertasStock = inventoryData.filter(item => 
+                item.cantidad <= item.stock_minimo && item.cantidad > 0).length;
+            const productosActivos = inventoryData.filter(item => item.cantidad > 0).length;
+
+            document.getElementById('totalProductos').textContent = totalProductos;
+            document.getElementById('valorInventario').textContent = `$${valorInventario.toLocaleString()}`;
+            document.getElementById('alertasStock').textContent = alertasStock;
+            document.getElementById('productosActivos').textContent = productosActivos;
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+
+        // Event listeners para filtros en tiempo real
+        document.getElementById('search').addEventListener('input', applyFilters);
+        document.getElementById('categoriaFilter').addEventListener('change', applyFilters);
+        document.getElementById('stockFilter').addEventListener('change', applyFilters);
+
+        // Cargar inventario al iniciar
+        document.addEventListener('DOMContentLoaded', loadInventory);
+    </script>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Reportes y Gráficos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn, .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-card h2 {
+            margin-bottom: 1rem;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .alerts-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th, .table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Reportes y Gráficos</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <a href="index.html" class="back-btn">Volver al Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">Reportes y Análisis de Negocio</h1>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalVentas">0</div>
+                <div class="stat-label">Ventas Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="ingresosTotales">$0</div>
+                <div class="stat-label">Ingresos Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalClientes">0</div>
+                <div class="stat-label">Clientes Registrados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="productosInventario">0</div>
+                <div class="stat-label">Productos en Inventario</div>
+            </div>
+        </div>
+
+        <div class="reports-grid">
+            <div class="report-card">
+                <h2>Ventas por Mes</h2>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <h2>Productos Más Vendidos</h2>
+                <div class="chart-container">
+                    <canvas id="productsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <h2>Estado del Inventario</h2>
+                <div class="chart-container">
+                    <canvas id="inventoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <h2>Distribución por Categorías</h2>
+                <div class="chart-container">
+                    <canvas id="categoriesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <h2>Alertas y Recomendaciones</h2>
+            <div id="alertsContainer">
+                <!-- Las alertas se cargarán dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+        }
+
+        let salesData = [];
+        let inventoryData = [];
+
+        // Cargar datos iniciales
+        async function loadInitialData() {
+            await loadSalesData();
+            await loadInventoryData();
+            updateCharts();
+            updateStats();
+            generateAlerts();
+        }
+
+        // Cargar datos de ventas
+        async function loadSalesData() {
+            try {
+                const response = await fetch('http://localhost:3000/api/reportes/ventas');
+                const data = await response.json();
+                salesData = data;
+            } catch (error) {
+                console.error('Error cargando datos de ventas:', error);
+            }
+        }
+
+        // Cargar datos de inventario
+        async function loadInventoryData() {
+            try {
+                const response = await fetch('http://localhost:3000/api/reportes/inventario');
+                const data = await response.json();
+                inventoryData = data;
+            } catch (error) {
+                console.error('Error cargando datos de inventario:', error);
+            }
+        }
+
+        // Actualizar gráficos
+        function updateCharts() {
+            updateSalesChart();
+            updateProductsChart();
+            updateInventoryChart();
+            updateCategoriesChart();
+        }
+
+        // Gráfico de ventas por mes
+        function updateSalesChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const months = Object.keys(salesData.ventasPorMes || {});
+            const amounts = Object.values(salesData.ventasPorMes || {});
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Ventas por Mes',
+                        data: amounts,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico de productos más vendidos
+        function updateProductsChart() {
+            const ctx = document.getElementById('productsChart').getContext('2d');
+            // Usar datos de ejemplo por ahora
+            const products = ['Laptop Dell', 'Mouse Logitech', 'Teclado Mecánico'];
+            const sales = [15, 25, 8];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: products,
+                    datasets: [{
+                        label: 'Unidades Vendidas',
+                        data: sales,
+                        backgroundColor: [
+                            '#ff6b6b',
+                            '#4ecdc4',
+                            '#45b7d1'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Gráfico de estado del inventario
+        function updateInventoryChart() {
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stock Normal', 'Stock Bajo', 'Sin Stock'],
+                    datasets: [{
+                        data: [inventoryData.productosActivos || 0, 
+                               inventoryData.productosBajoStock?.length || 0, 
+                               0], // Sin stock calculado
+                        backgroundColor: [
+                            '#2ecc71',
+                            '#f39c12',
+                            '#e74c3c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Gráfico de categorías
+        function updateCategoriesChart() {
+            const ctx = document.getElementById('categoriesChart').getContext('2d');
+            
+            // Datos de ejemplo por categorías
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Computadoras', 'Periféricos', 'Componentes', 'Redes'],
+                    datasets: [{
+                        data: [30, 25, 20, 15],
+                        backgroundColor: [
+                            '#3498db',
+                            '#9b59b6',
+                            '#e74c3c',
+                            '#f1c40f'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            document.getElementById('totalVentas').textContent = salesData.cantidadVentas || 0;
+            document.getElementById('ingresosTotales').textContent = `$${(salesData.totalVentas || 0).toLocaleString()}`;
+            document.getElementById('totalClientes').textContent = '2'; // Datos de ejemplo
+            document.getElementById('productosInventario').textContent = inventoryData.totalProductos || 0;
+        }
+
+        // Generar alertas
+        function generateAlerts() {
+            const alertsContainer = document.getElementById('alertsContainer');
+            const alerts = [];
+
+            // Alertas de stock bajo
+            if (inventoryData.productosBajoStock && inventoryData.productosBajoStock.length > 0) {
+                alerts.push(`
+                    <div class="alert-item alert-warning">
+                        <span>${inventoryData.productosBajoStock.length} productos con stock bajo</span>
+                        <button class="btn btn-secondary" onclick="viewLowStock()">Ver Detalles</button>
+                    </div>
+                `);
+            }
+
+            // Alertas de ventas (ejemplo)
+            if ((salesData.totalVentas || 0) < 10000) {
+                alerts.push(`
+                    <div class="alert-item alert-warning">
+                        <span>Ventas del mes por debajo del objetivo</span>
+                        <button class="btn btn-secondary" onclick="viewSalesReport()">Ver Reporte</button>
+                    </div>
+                `);
+            }
+
+            // Alertas de clientes (ejemplo)
+            alerts.push(`
+                <div class="alert-item alert-warning">
+                    <span>3 clientes no han realizado compras en más de 30 días</span>
+                    <button class="btn btn-secondary" onclick="viewClientFollowup()">Seguimiento</button>
+                </div>
+            `);
+
+            alertsContainer.innerHTML = alerts.join('') || '<p>No hay alertas en este momento.</p>';
+        }
+
+        function viewLowStock() {
+            window.location.href = 'consulta_inventario.html';
+        }
+
+        function viewSalesReport() {
+            window.location.href = 'historial_ventas.html';
+        }
+
+        function viewClientFollowup() {
+            window.location.href = 'seguimiento_clientes.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', loadInitialData);
+    </script>
+</body>
+</html>

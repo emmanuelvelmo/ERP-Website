@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Registro de Ventas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn, .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .sale-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .products-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-card {
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .product-card:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .product-card.selected {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .product-stock {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .cart-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 5px, 15px, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+
+        .total-section {
+            text-align: right;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .out-of-stock {
+            color: #dc3545;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Registro de Ventas</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <a href="index.html" class="back-btn">Volver al Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">Registro de Nueva Venta</h1>
+
+        <div class="sale-form">
+            <h2>Información de la Venta</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="cliente">Cliente:</label>
+                    <select id="cliente" required>
+                        <option value="">Seleccionar cliente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" value="<?php echo date('Y-m-d'); ?>" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="products-section">
+            <h2>Seleccionar Productos</h2>
+            <div class="product-grid" id="productsGrid">
+                <!-- Los productos se cargarán dinámicamente -->
+            </div>
+        </div>
+
+        <div class="cart-section">
+            <h2>Carrito de Venta</h2>
+            <table id="cartTable">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio Unitario</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cartBody">
+                    <!-- Los productos del carrito se cargarán dinámicamente -->
+                </tbody>
+            </table>
+            <div class="total-section">
+                Total: $<span id="totalAmount">0.00</span>
+            </div>
+            <button class="btn btn-success" onclick="processSale()">Procesar Venta</button>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+        }
+
+        let products = [];
+        let clients = [];
+        let cart = [];
+
+        // Cargar datos iniciales
+        async function loadInitialData() {
+            await loadProducts();
+            await loadClients();
+        }
+
+        // Cargar productos
+        async function loadProducts() {
+            try {
+                const response = await fetch('http://localhost:3000/api/inventario');
+                products = await response.json();
+                displayProducts();
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+            }
+        }
+
+        // Cargar clientes
+        async function loadClients() {
+            try {
+                const response = await fetch('http://localhost:3000/api/clientes');
+                clients = await response.json();
+                const clienteSelect = document.getElementById('cliente');
+                clienteSelect.innerHTML = '<option value="">Seleccionar cliente</option>' +
+                    clients.map(client => 
+                        `<option value="${client.id}">${client.nombre}</option>`
+                    ).join('');
+            } catch (error) {
+                console.error('Error cargando clientes:', error);
+            }
+        }
+
+        // Mostrar productos disponibles
+        function displayProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            productsGrid.innerHTML = products.map(product => {
+                const outOfStock = product.cantidad === 0;
+                return `
+                    <div class="product-card ${outOfStock ? 'out-of-stock' : ''}" 
+                         onclick="${outOfStock ? '' : `addToCart(${product.producto_id})`}">
+                        <div class="product-name">${product.nombre}</div>
+                        <div class="product-price">$${product.precio_venta?.toLocaleString() || 'N/A'}</div>
+                        <div class="product-stock">
+                            ${outOfStock ? '<span class="out-of-stock">Sin stock</span>' : `Stock: ${product.cantidad}`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Agregar producto al carrito
+        function addToCart(productId) {
+            const product = products.find(p => p.producto_id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.producto_id === productId);
+            
+            if (existingItem) {
+                if (existingItem.cantidad < product.cantidad) {
+                    existingItem.cantidad++;
+                } else {
+                    alert('No hay suficiente stock disponible');
+                    return;
+                }
+            } else {
+                cart.push({
+                    producto_id: productId,
+                    nombre: product.nombre,
+                    precio: product.precio_venta || 0,
+                    cantidad: 1,
+                    stock_disponible: product.cantidad
+                });
+            }
+
+            updateCart();
+        }
+
+        // Actualizar carrito
+        function updateCart() {
+            const cartBody = document.getElementById('cartBody');
+            const totalAmount = document.getElementById('totalAmount');
+            
+            cartBody.innerHTML = cart.map((item, index) => `
+                <tr>
+                    <td>${item.nombre}</td>
+                    <td>$${item.precio.toLocaleString()}</td>
+                    <td class="quantity-controls">
+                        <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                        ${item.cantidad}
+                        <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                    </td>
+                    <td>$${(item.precio * item.cantidad).toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="removeFromCart(${index})">Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            totalAmount.textContent = total.toLocaleString('es-MX', { minimumFractionDigits: 2 });
+        }
+
+        // Actualizar cantidad
+        function updateQuantity(index, change) {
+            const item = cart[index];
+            const newQuantity = item.cantidad + change;
+            
+            if (newQuantity < 1) {
+                removeFromCart(index);
+                return;
+            }
+            
+            if (newQuantity > item.stock_disponible) {
+                alert('No hay suficiente stock disponible');
+                return;
+            }
+            
+            item.cantidad = newQuantity;
+            updateCart();
+        }
+
+        // Eliminar del carrito
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        // Procesar venta
+        async function processSale() {
+            const clienteId = document.getElementById('cliente').value;
+            
+            if (!clienteId) {
+                alert('Por favor selecciona un cliente');
+                return;
+            }
+            
+            if (cart.length === 0) {
+                alert('El carrito está vacío');
+                return;
+            }
+
+            const saleData = {
+                cliente_id: parseInt(clienteId),
+                productos: cart.map(item => ({
+                    producto_id: item.producto_id,
+                    cantidad: item.cantidad,
+                    precio: item.precio
+                })),
+                total: cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
+            };
+
+            try {
+                const response = await fetch('http://localhost:3000/api/ventas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(saleData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Venta registrada exitosamente');
+                    cart = [];
+                    updateCart();
+                    document.getElementById('cliente').value = '';
+                    await loadProducts(); // Recargar productos para actualizar stock
+                } else {
+                    alert('Error al registrar venta: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error de conexión al procesar la venta');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', loadInitialData);
+    </script>
+</body>
+</html>

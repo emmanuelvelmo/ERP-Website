@@ -1,0 +1,14 @@
+{
+  "empresa": {
+    "nombre": "Compustar TechStore",
+    "slogan": "Soluciones que conectan",
+    "telefono": "664-123-4567",
+    "email": "info@compustar.com",
+    "direccion": "Plaza Alameda, Otay, Tijuana, B.C."
+  },
+  "sistema": {
+    "version": "1.0.0",
+    "moneda": "MXN",
+    "iva": 0.16
+  }
+}

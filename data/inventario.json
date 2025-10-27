@@ -1,0 +1,20 @@
+[
+  {
+    "producto_id": 1,
+    "cantidad": 5,
+    "stock_minimo": 2,
+    "ubicacion": "Almacén A"
+  },
+  {
+    "producto_id": 2,
+    "cantidad": 25,
+    "stock_minimo": 10,
+    "ubicacion": "Almacén B"
+  },
+  {
+    "producto_id": 3,
+    "cantidad": 8,
+    "stock_minimo": 5,
+    "ubicacion": "Almacén A"
+  }
+]

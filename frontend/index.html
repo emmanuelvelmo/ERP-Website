@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-sidebar {
+            background: white;
+            width: 250px;
+            height: calc(100vh - 70px);
+            position: fixed;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1.5rem;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: #f8f9fa;
+            border-left-color: #667eea;
+        }
+
+        .nav-item.active {
+            background: #f8f9fa;
+            border-left-color: #667eea;
+            color: #667eea;
+        }
+
+        .nav-item a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            font-weight: 500;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: calc(100vh - 70px);
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card.sales { border-top: 4px solid #2ecc71; }
+        .card.inventory { border-top: 4px solid #3498db; }
+        .card.clients { border-top: 4px solid #e74c3c; }
+        .card.alerts { border-top: 4px solid #f39c12; }
+
+        .recent-activity {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .recent-activity h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Dashboard</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="nav-sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item active"><a href="index.html">Dashboard</a></li>
+            <li class="nav-item"><a href="gestion_inventario.html">Gestión de Inventario</a></li>
+            <li class="nav-item"><a href="consulta_inventario.html">Consulta de Inventario</a></li>
+            <li class="nav-item"><a href="registro_ventas.html">Registro de Ventas</a></li>
+            <li class="nav-item"><a href="historial_ventas.html">Historial de Ventas</a></li>
+            <li class="nav-item"><a href="registro_clientes.html">Registro de Clientes</a></li>
+            <li class="nav-item"><a href="seguimiento_clientes.html">Seguimiento de Clientes</a></li>
+            <li class="nav-item"><a href="dashboard.html">Reportes y Gráficos</a></li>
+            <li class="nav-item"><a href="gestion_usuarios.html">Gestión de Usuarios</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="dashboard-cards">
+            <div class="card sales">
+                <h3>Ventas del Mes</h3>
+                <div class="number" id="ventasMes">$0</div>
+            </div>
+            <div class="card inventory">
+                <h3>Productos en Inventario</h3>
+                <div class="number" id="totalProductos">0</div>
+            </div>
+            <div class="card clients">
+                <h3>Clientes Registrados</h3>
+                <div class="number" id="totalClientes">0</div>
+            </div>
+            <div class="card alerts">
+                <h3>Alertas de Stock</h3>
+                <div class="number" id="alertasStock">0</div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <h2>Actividad Reciente</h2>
+            <ul class="activity-list" id="activityList">
+                <!-- La actividad se cargará dinámicamente -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión al cargar la página
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+        }
+
+        // Cargar datos del dashboard
+        async function loadDashboardData() {
+            try {
+                // Cargar ventas
+                const ventasResponse = await fetch('http://localhost:3000/api/ventas');
+                const ventas = await ventasResponse.json();
+                
+                // Calcular ventas del mes actual
+                const mesActual = new Date().getMonth();
+                const ventasMes = ventas.filter(v => new Date(v.fecha).getMonth() === mesActual)
+                                      .reduce((sum, v) => sum + v.total, 0);
+                
+                document.getElementById('ventasMes').textContent = `$${ventasMes.toLocaleString()}`;
+                document.getElementById('totalClientes').textContent = ventas.length;
+
+                // Cargar inventario
+                const inventarioResponse = await fetch('http://localhost:3000/api/inventario');
+                const inventario = await inventarioResponse.json();
+                
+                document.getElementById('totalProductos').textContent = inventario.length;
+                
+                // Contar alertas de stock
+                const alertas = inventario.filter(item => item.cantidad <= item.stock_minimo).length;
+                document.getElementById('alertasStock').textContent = alertas;
+
+                // Cargar actividad reciente (últimas 5 ventas)
+                const actividadReciente = ventas.slice(0, 5);
+                const activityList = document.getElementById('activityList');
+                activityList.innerHTML = actividadReciente.map(venta => `
+                    <li class="activity-item">
+                        <span>Venta #${venta.id} - ${venta.cliente_nombre}</span>
+                        <span>$${venta.total.toLocaleString()}</span>
+                    </li>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error cargando datos del dashboard:', error);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+
+        // Cargar datos cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
+    </script>
+</body>
+</html>

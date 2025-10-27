@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Seguimiento de Clientes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn, .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .clients-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .client-card {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .client-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .client-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .client-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .client-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .sales-history {
+            margin-top: 1rem;
+        }
+
+        .sales-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+
+        .sales-table th, .sales-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sales-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .no-sales {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Seguimiento de Clientes</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <a href="index.html" class="back-btn">Volver al Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">Seguimiento y Análisis de Clientes</h1>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalClientes">0</div>
+                <div class="stat-label">Total Clientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="clientesActivos">0</div>
+                <div class="stat-label">Clientes Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="ingresosClientes">$0</div>
+                <div class="stat-label">Ingresos por Clientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="promedioCompra">$0</div>
+                <div class="stat-label">Ticket Promedio</div>
+            </div>
+        </div>
+
+        <div class="clients-section">
+            <h2>Detalle de Clientes</h2>
+            <div id="clientsContainer">
+                <!-- Los clientes se cargarán dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+        }
+
+        let clientsData = [];
+        let salesData = [];
+
+        // Cargar datos iniciales
+        async function loadInitialData() {
+            await loadClients();
+            await loadSales();
+        }
+
+        // Cargar clientes
+        async function loadClients() {
+            try {
+                const response = await fetch('http://localhost:3000/api/clientes');
+                clientsData = await response.json();
+                displayClients();
+                updateStats();
+            } catch (error) {
+                console.error('Error cargando clientes:', error);
+            }
+        }
+
+        // Cargar ventas
+        async function loadSales() {
+            try {
+                const response = await fetch('http://localhost:3000/api/ventas');
+                salesData = await response.json();
+                displayClients(); // Volver a mostrar clientes con datos de ventas actualizados
+                updateStats();
+            } catch (error) {
+                console.error('Error cargando ventas:', error);
+            }
+        }
+
+        function displayClients() {
+            const clientsContainer = document.getElementById('clientsContainer');
+            
+            clientsContainer.innerHTML = clientsData.map(client => {
+                const clientSales = salesData.filter(sale => sale.cliente_id === client.id);
+                const totalSpent = clientSales.reduce((sum, sale) => sum + sale.total, 0);
+                const salesCount = clientSales.length;
+                const lastSale = clientSales.length > 0 ? 
+                    new Date(Math.max(...clientSales.map(s => new Date(s.fecha)))) : null;
+
+                return `
+                    <div class="client-card">
+                        <div class="client-header">
+                            <div class="client-name">${client.nombre}</div>
+                            <div style="color: #28a745; font-weight: bold;">
+                                $${totalSpent.toLocaleString()}
+                            </div>
+                        </div>
+                        
+                        <div class="client-info">
+                            <div class="info-item">
+                                <span class="info-label">Email</span>
+                                <span class="info-value">${client.email}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Teléfono</span>
+                                <span class="info-value">${client.telefono}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Total Compras</span>
+                                <span class="info-value">${salesCount}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Última Compra</span>
+                                <span class="info-value">${lastSale ? lastSale.toLocaleDateString() : 'Sin compras'}</span>
+                            </div>
+                        </div>
+
+                        ${salesCount > 0 ? `
+                            <div class="sales-history">
+                                <h4>Historial de Compras</h4>
+                                <table class="sales-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>ID Venta</th>
+                                            <th>Total</th>
+                                            <th>Productos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${clientSales.map(sale => `
+                                            <tr>
+                                                <td>${new Date(sale.fecha).toLocaleDateString()}</td>
+                                                <td>#${sale.id}</td>
+                                                <td>$${sale.total.toLocaleString()}</td>
+                                                <td>${sale.productos.length} productos</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ` : '<div class="no-sales">Este cliente no ha realizado compras</div>'}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const totalClientes = clientsData.length;
+            const clientesActivos = new Set(salesData.map(sale => sale.cliente_id)).size;
+            const ingresosClientes = salesData.reduce((sum, sale) => sum + sale.total, 0);
+            const promedioCompra = salesData.length > 0 ? ingresosClientes / salesData.length : 0;
+
+            document.getElementById('totalClientes').textContent = totalClientes;
+            document.getElementById('clientesActivos').textContent = clientesActivos;
+            document.getElementById('ingresosClientes').textContent = `$${ingresosClientes.toLocaleString()}`;
+            document.getElementById('promedioCompra').textContent = `$${promedioCompra.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', loadInitialData);
+    </script>
+</body>
+</html>

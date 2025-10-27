@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysGestor - Gestión de Usuarios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn, .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .admin-only {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-section, .list-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .role-admin { color: #e74c3c; font-weight: bold; }
+        .role-ventas { color: #3498db; font-weight: bold; }
+        .role-inventario { color: #f39c12; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1>SysGestor - Gestión de Usuarios</h1>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <a href="index.html" class="back-btn">Volver al Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">Gestión de Usuarios del Sistema</h1>
+
+        <div id="adminMessage" class="admin-only" style="display: none;">
+            ⚠️ Esta sección solo está disponible para usuarios administradores.
+        </div>
+
+        <div id="adminContent" style="display: none;">
+            <div class="form-section">
+                <h2>Registrar Nuevo Usuario</h2>
+                <form id="userForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nombre">Nombre Completo:</label>
+                            <input type="text" id="nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="usuario">Usuario:</label>
+                            <input type="text" id="usuario" name="usuario" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Contraseña:</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rol">Rol:</label>
+                            <select id="rol" name="rol" required>
+                                <option value="">Seleccionar rol</option>
+                                <option value="admin">Administrador</option>
+                                <option value="ventas">Ventas</option>
+                                <option value="inventario">Inventario</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Registrar Usuario</button>
+                </form>
+            </div>
+
+            <div class="list-section">
+                <h2>Usuarios del Sistema</h2>
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersBody">
+                        <!-- Los usuarios se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión y permisos
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = usuario.nombre;
+            
+            // Mostrar contenido solo si es administrador
+            if (usuario.rol === 'admin') {
+                document.getElementById('adminContent').style.display = 'block';
+                loadUsers();
+            } else {
+                document.getElementById('adminMessage').style.display = 'block';
+            }
+        }
+
+        // Cargar usuarios
+        async function loadUsers() {
+            try {
+                const response = await fetch('../data/usuarios.json');
+                const users = await response.json();
+                
+                const tbody = document.getElementById('usersBody');
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.nombre}</td>
+                        <td>${user.usuario}</td>
+                        <td>${user.email}</td>
+                        <td class="role-${user.rol}">${user.rol}</td>
+                        <td>${new Date(user.fecha_creacion).toLocaleDateString()}</td>
+                        <td class="actions">
+                            <button class="btn-edit" onclick="editUser(${user.id})">Editar</button>
+                            ${user.id !== usuario.id ? 
+                                `<button class="btn-delete" onclick="deleteUser(${user.id})">Eliminar</button>` : 
+                                '<span style="color: #666;">Actual</span>'
+                            }
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+            }
+        }
+
+        // Registrar nuevo usuario
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const userData = {
+                nombre: formData.get('nombre'),
+                usuario: formData.get('usuario'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                rol: formData.get('rol')
+            };
+
+            try {
+                // En un sistema real, aquí se haría una petición al backend
+                // Por ahora, solo simulamos la funcionalidad
+                alert('Funcionalidad de registro de usuarios en desarrollo. En un sistema real, esto guardaría en el backend.');
+                
+                // Limpiar formulario
+                this.reset();
+                
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        });
+
+        function editUser(id) {
+            alert('Editar usuario ' + id + ' - Funcionalidad en desarrollo');
+        }
+
+        function deleteUser(id) {
+            if (confirm('¿Estás seguro de eliminar este usuario?')) {
+                alert('Eliminar usuario ' + id + ' - Funcionalidad en desarrollo');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

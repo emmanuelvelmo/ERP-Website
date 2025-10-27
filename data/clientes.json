@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "nombre": "Empresa ABC Solutions",
+    "email": "contacto@abcsolutions.com",
+    "telefono": "6641234567",
+    "direccion": "Av. Principal 123, Tijuana, BC",
+    "fecha_registro": "2025-01-10T09:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "nombre": "Tecnología Avanzada SA",
+    "email": "compras@tecnologiaavanzada.com",
+    "telefono": "6649876543",
+    "direccion": "Blvd. Industrial 456, Tijuana, BC",
+    "fecha_registro": "2025-01-12T11:30:00.000Z"
+  }
+]

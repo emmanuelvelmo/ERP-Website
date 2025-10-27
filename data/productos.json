@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "nombre": "Laptop Dell Inspiron 15",
+    "descripcion": "Laptop 15 pulgadas, 8GB RAM, 256GB SSD",
+    "categoria": "Computadoras",
+    "precio_compra": 8500,
+    "precio_venta": 12000,
+    "fecha_creacion": "2025-01-15T10:30:00.000Z"
+  },
+  {
+    "id": 2,
+    "nombre": "Mouse Inalámbrico Logitech",
+    "descripcion": "Mouse óptico inalámbrico, 2.4GHz",
+    "categoria": "Periféricos",
+    "precio_compra": 150,
+    "precio_venta": 300,
+    "fecha_creacion": "2025-01-15T10:35:00.000Z"
+  },
+  {
+    "id": 3,
+    "nombre": "Teclado Mecánico RGB",
+    "descripcion": "Teclado mecánico gaming con retroiluminación RGB",
+    "categoria": "Periféricos",
+    "precio_compra": 400,
+    "precio_venta": 800,
+    "fecha_creacion": "2025-01-15T10:40:00.000Z"
+  }
+]
